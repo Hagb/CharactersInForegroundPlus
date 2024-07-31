@@ -1,3 +1,6 @@
 [submodule "SokuLib"]
 	path = SokuLib
-	url = https://github.com/SokuDev/SokuLib
+	url = https://github.com/Hagb/SokuLib
+[submodule "detours"]
+	path = detours
+	url = https://github.com/microsoft/Detours.git

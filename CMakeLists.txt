@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
-set(PROJECT_NAME ModTemplate)
+set(PROJECT_NAME CharacterInForeground)
 project("${PROJECT_NAME}" C CXX)
 
 set(CMAKE_C_STANDARD 11)
@@ -16,6 +16,10 @@ endif ()
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /Brepro")
 SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /Brepro")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /Brepro")
+# generate pdb file for release build (https://stackoverflow.com/a/31264946)
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
 # SokuLib
 add_subdirectory(SokuLib)
@@ -24,6 +28,17 @@ add_subdirectory(SokuLib)
 add_library(
         "${PROJECT_NAME}"
         MODULE
+        detours/src/detours.cpp
+        detours/src/modules.cpp
+        detours/src/disasm.cpp
+        detours/src/image.cpp
+        detours/src/creatwth.cpp
+        detours/src/disolx86.cpp
+        detours/src/disolx64.cpp
+        detours/src/disolia64.cpp
+        detours/src/disolarm.cpp
+        detours/src/disolarm64.cpp
+ 
         src/main.cpp
         src/version.rc
 )
@@ -37,4 +52,6 @@ target_link_libraries(
         shlwapi
         d3d9
         d3dx9
+	psapi
 )
+target_include_directories("${PROJECT_NAME}" PRIVATE detours/src)
