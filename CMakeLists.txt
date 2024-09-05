@@ -28,17 +28,6 @@ add_subdirectory(SokuLib)
 add_library(
         "${PROJECT_NAME}"
         MODULE
-        detours/src/detours.cpp
-        detours/src/modules.cpp
-        detours/src/disasm.cpp
-        detours/src/image.cpp
-        detours/src/creatwth.cpp
-        detours/src/disolx86.cpp
-        detours/src/disolx64.cpp
-        detours/src/disolia64.cpp
-        detours/src/disolarm.cpp
-        detours/src/disolarm64.cpp
- 
         src/main.cpp
         src/version.rc
 )
@@ -54,4 +43,3 @@ target_link_libraries(
         d3dx9
 	psapi
 )
-target_include_directories("${PROJECT_NAME}" PRIVATE detours/src)

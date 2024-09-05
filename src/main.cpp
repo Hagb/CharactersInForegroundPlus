@@ -25,7 +25,6 @@
 #include "Tamper.hpp"
 #include "VTables.hpp"
 #include "Vector2.hpp"
-#include "detours.h"
 #include "libloaderapi.h"
 #include "memoryapi.h"
 #include "minwindef.h"
@@ -516,14 +515,20 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule,
   assert(cif != 0);
   auto init = (bool (*)(HMODULE))GetProcAddress(cif, "Initialize");
   assert(init != 0);
-  DetourTransactionBegin();
-  DetourAttach(&ogVirtualProtect, myVirtualProtect);
-  DetourTransactionCommit();
+  MODULEINFO moduleinfo;
+  GetModuleInformation(GetCurrentProcess(), cif, &moduleinfo,
+                       sizeof(moduleinfo));
+  const auto pp_VirtualProtect =
+      (BOOL(WINAPI **)(LPVOID, SIZE_T, DWORD, PDWORD))(
+          (unsigned char *)moduleinfo.lpBaseOfDll + (0x1000f018u - 0x10000000));
+  DWORD old;
+  VirtualProtect(pp_VirtualProtect, 4, PAGE_EXECUTE_READWRITE, &old);
+  ogVirtualProtect = SokuLib::TamperDword(pp_VirtualProtect, myVirtualProtect);
   threadId = GetCurrentThreadId();
   init(hMyModule);
-  DetourTransactionBegin();
-  DetourDetach(&ogVirtualProtect, myVirtualProtect);
-  DetourTransactionCommit();
+  threadId.store({});
+  SokuLib::TamperDword(pp_VirtualProtect, ogVirtualProtect);
+  VirtualProtect(pp_VirtualProtect, 4, old, &old);
   std::unordered_set<char *> bytes;
   for (auto i = cifHookMap.begin(); i != cifHookMap.end(); i++) {
     if (i->second.cif_hooked.size() == 0)
@@ -534,7 +539,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule,
       bytes.insert(a);
     }
   }
-  DWORD old;
   VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE,
                  PAGE_EXECUTE_WRITECOPY, &old);
   // hook Select OnProcess
