@@ -277,17 +277,17 @@ int WINAPI mySendto(SOCKET s, const char *buf, int len, int flags,
         }
         break;
       case SokuLib::GAME_REPLAY: {
-        static auto replay = SokuLib::DPP_REPLAY();
-        replay.decode(&packet->game.event);
-        size_t end = replay.frameId + 1;
-        size_t start = end - replay.inputs.size() / 2;
-        std::cout << start << " " << end << std::endl;
-        // send CiF status at the beginning of a battle and every 300 frames.
-        if (start < 120 || end / 300 > start / 300) {
-          char buf[] = {'C', playersCiF[0].load().to_char(),
-                        playersCiF[1].load().to_char()};
-          (*oriSendto)(s, buf, sizeof(buf), flags, to, tolen);
-        }
+        // static auto replay = SokuLib::DPP_REPLAY();
+        // replay.decode(&packet->game.event);
+        // size_t end = replay.frameId + 1;
+        // size_t start = end - replay.inputs.size() / 2;
+        // std::cout << start << " " << end << std::endl;
+        // // send CiF status at the beginning of a battle and every 300 frames.
+        // if (start < 120 || end / 300 > start / 300) {
+        char buf[] = {'C', playersCiF[0].load().to_char(),
+                      playersCiF[1].load().to_char()};
+        (*oriSendto)(s, buf, sizeof(buf), flags, to, tolen);
+        // }
       }
       default:;
       }
