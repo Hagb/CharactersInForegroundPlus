@@ -540,7 +540,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule,
     }
   }
   VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE,
-                 PAGE_EXECUTE_WRITECOPY, &old);
+                 PAGE_EXECUTE_READWRITE, &old);
   // hook Select OnProcess
   static int (SokuLib::SelectClient::*const ogSelectClientOnProcess)() =
       SokuLib::TamperDword(
@@ -603,7 +603,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule,
           myBattleOnRender<SokuLib::BattleClient, &ogBattleClientOnRender>);
   VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
   VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE,
-                 PAGE_EXECUTE_WRITECOPY, &old);
+                 PAGE_EXECUTE_READWRITE, &old);
   static int(WINAPI *const oriRecvfrom)(SOCKET, char *, int, int, SOCKADDR *,
                                         int *) =
       SokuLib::TamperNearCall(0x0041dae5, myRecvfrom<&oriRecvfrom>);
@@ -627,8 +627,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule,
         (DWORD)cif_call_draw_characters,
         drawHitCountersAfterDrawCharacters<&oriDrawCharacters>);
     VirtualProtect(cif_call_draw_characters, 5, old, &old);
-    FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
   }
+  FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
   std::atomic_thread_fence(std::memory_order_release);
   return true;
 }
