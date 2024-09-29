@@ -369,10 +369,10 @@ int __fastcall myBattleOnProcess(T *This) {
     lastBattleMode = SokuLib::mainMode;
   }
   bool status = preference;
-  if (switchByKey && checkKey(switchKey)) {
+  if (switchByKey && checkKey(switchKey) && !checkNoModKeys()) {
     selfCifChangedTime = std::chrono::system_clock::now();
     if (!lastPress) {
-      if (!isNetplay && !checkNoModKeys()) {
+      if (!isNetplay) {
         lastPress = true;
         status = !status;
         preference = status;
