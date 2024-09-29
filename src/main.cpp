@@ -219,6 +219,9 @@ extern "C" __declspec(dllexport) char setPlayerCifStatus(bool p2, char v) {
 }
 
 bool checkKey(unsigned char scancode) { return ((char *)0x8a01b8)[scancode]; }
+bool checkNoModKeys() { 
+  return !checkKey(DIK_LALT) && !checkKey(DIK_RALT) && !GetAsyncKeyState(VK_MENU);
+}
 
 static std::atomic<std::chrono::system_clock::time_point> othersChangedTime;
 static std::chrono::system_clock::duration selectOthersChangedDuration;
@@ -366,7 +369,7 @@ int __fastcall myBattleOnProcess(T *This) {
     lastBattleMode = SokuLib::mainMode;
   }
   bool status = preference;
-  if (switchByKey && checkKey(switchKey)) {
+  if (switchByKey && checkKey(switchKey) && !checkNoModKeys()) {
     selfCifChangedTime = std::chrono::system_clock::now();
     if (!lastPress) {
       if (!isNetplay) {
@@ -398,7 +401,7 @@ int __fastcall mySelectOnProcess(T *This) {
     lastBattleMode = SokuLib::mainMode;
   }
   bool status = preference;
-  if (switchByKey && checkKey(switchKey)) {
+  if (switchByKey && checkKey(switchKey) && checkNoModKeys()) {
     selfCifChangedTime = std::chrono::system_clock::now();
     if (!lastPress) {
       auto This_ = (SokuLib::Select *)This;
