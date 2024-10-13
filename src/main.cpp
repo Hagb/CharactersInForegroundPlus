@@ -224,6 +224,14 @@ bool checkNoModKeys() {
          !GetAsyncKeyState(VK_MENU) && !GetAsyncKeyState(VK_LWIN) &&
          !GetAsyncKeyState(VK_RWIN);
 }
+bool checkSwitchKey() {
+  static bool noModifierKeyPressed = checkNoModKeys();
+  const bool pressed = switchKey && checkKey(switchKey);
+  if (pressed)
+    return noModifierKeyPressed;
+  noModifierKeyPressed = checkNoModKeys();
+  return false;
+}
 
 static std::atomic<std::chrono::system_clock::time_point> othersChangedTime;
 static std::chrono::system_clock::duration selectOthersChangedDuration;
@@ -371,7 +379,7 @@ int __fastcall myBattleOnProcess(T *This) {
     lastBattleMode = SokuLib::mainMode;
   }
   bool status = preference;
-  if (switchByKey && checkKey(switchKey) && !checkNoModKeys()) {
+  if (checkSwitchKey()) {
     selfCifChangedTime = std::chrono::system_clock::now();
     if (!lastPress) {
       if (!isNetplay) {
@@ -403,7 +411,7 @@ int __fastcall mySelectOnProcess(T *This) {
     lastBattleMode = SokuLib::mainMode;
   }
   bool status = preference;
-  if (switchByKey && checkKey(switchKey) && checkNoModKeys()) {
+  if (checkSwitchKey()) {
     selfCifChangedTime = std::chrono::system_clock::now();
     if (!lastPress) {
       auto This_ = (SokuLib::Select *)This;
