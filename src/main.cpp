@@ -219,8 +219,10 @@ extern "C" __declspec(dllexport) char setPlayerCifStatus(bool p2, char v) {
 }
 
 bool checkKey(unsigned char scancode) { return ((char *)0x8a01b8)[scancode]; }
-bool checkNoModKeys() { 
-  return !checkKey(DIK_LALT) && !checkKey(DIK_RALT) && !GetAsyncKeyState(VK_MENU);
+bool checkNoModKeys() {
+  return !checkKey(DIK_LALT) && !checkKey(DIK_RALT) &&
+         !GetAsyncKeyState(VK_MENU) && !GetAsyncKeyState(VK_LWIN) &&
+         !GetAsyncKeyState(VK_RWIN);
 }
 
 static std::atomic<std::chrono::system_clock::time_point> othersChangedTime;
