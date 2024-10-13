@@ -6,8 +6,11 @@
 #include <cstdint>
 #include <dinput.h>
 //
-#include <atomic>
+#ifndef NDEBUG
 #include <iostream>
+#endif
+
+#include <atomic>
 #include <iterator>
 #include <map>
 #include <mutex>
@@ -96,13 +99,17 @@ void hook() {
   for (auto i = cifHookMap.begin(); i != cifHookMap.end(); i++)
     i->second.hook();
   FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+#ifndef NDEBUG
   std::cout << "hook CiF" << std::endl;
+#endif
 }
 void unhook() {
   for (auto i = cifHookMap.rbegin(); i != cifHookMap.rend(); i++)
     i->second.unhook();
   FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+#ifndef NDEBUG
   std::cout << "unhook CiF" << std::endl;
+#endif
 }
 
 struct CifStatus {
@@ -294,7 +301,9 @@ int WINAPI mySendto(SOCKET s, const char *buf, int len, int flags,
         // replay.decode(&packet->game.event);
         // size_t end = replay.frameId + 1;
         // size_t start = end - replay.inputs.size() / 2;
+        // #ifndef NDEBUG
         // std::cout << start << " " << end << std::endl;
+        // #endif
         // // send CiF status at the beginning of a battle and every 300 frames.
         // if (start < 120 || end / 300 > start / 300) {
         char buf[] = {'C', playersCiF[0].load().to_char(),
@@ -318,8 +327,10 @@ void drawOnPosition(SokuLib::DrawUtils::Sprite &text, int x, int y) {
 
 template <class T, int (T::*const *ogBattleOnRender)()>
 int __fastcall myBattleOnRender(T *This) {
-  // std::cout << (int)playersCiF[0].load().to_char() << " "
-  //           << (int)playersCiF[1].load().to_char() << std::endl;
+#ifndef NDEBUG
+  std::cout << (int)playersCiF[0].load().to_char() << " "
+            << (int)playersCiF[1].load().to_char() << std::endl;
+#endif
   int ret = (This->**ogBattleOnRender)();
   if (!render)
     return ret;
@@ -342,8 +353,10 @@ int __fastcall myBattleOnRender(T *This) {
 
 template <class T, int (T::*const *ogSelectOnRender)()>
 int __fastcall mySelectOnRender(T *This) {
-  // std::cout << (int)playersCiF[0].load().to_char() << " "
-  //           << (int)playersCiF[1].load().to_char() << std::endl;
+#ifndef NDEBUG
+  std::cout << (int)playersCiF[0].load().to_char() << " "
+            << (int)playersCiF[1].load().to_char() << std::endl;
+#endif
   int ret = (This->**ogSelectOnRender)();
   if (!render)
     return ret;
@@ -416,9 +429,11 @@ int __fastcall mySelectOnProcess(T *This) {
     if (!lastPress) {
       auto This_ = (SokuLib::Select *)This;
       lastPress = true;
+#ifndef NDEBUG
       std::cout << (int)SokuLib::mainMode << " "
                 << (int)This_->leftSelectionStage << " "
                 << (int)This_->rightSelectionStage << std::endl;
+#endif
       do {
         switch (SokuLib::mainMode) {
         case SokuLib::BATTLE_MODE_VSCLIENT: // as server
