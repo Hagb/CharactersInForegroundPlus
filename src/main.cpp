@@ -232,11 +232,17 @@ bool checkNoModKeys() {
          !GetAsyncKeyState(VK_RWIN);
 }
 bool checkSwitchKey() {
-  static bool noModifierKeyPressed = checkNoModKeys();
-  const bool pressed = switchKey && checkKey(switchKey);
-  if (pressed)
+  static bool noModifierKeyPressed = true;
+  static bool pressed = false;
+  if (pressed) {
+    pressed = switchByKey && checkKey(switchKey);
+    return pressed && noModifierKeyPressed;
+  }
+  pressed = switchByKey && checkKey(switchKey);
+  if (pressed) {
+    noModifierKeyPressed = checkNoModKeys();
     return noModifierKeyPressed;
-  noModifierKeyPressed = checkNoModKeys();
+  }
   return false;
 }
 
